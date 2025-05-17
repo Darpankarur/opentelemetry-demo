@@ -96,8 +96,8 @@ jobs:
           #   dockerfile: ./src/currency/Dockerfile
           # - service: emailservice
           #   dockerfile: ./src/email/Dockerfile
-          - service: frontend
-            dockerfile: ./src/frontend/Dockerfile
+          # - service: frontend
+          #   dockerfile: ./src/frontend/Dockerfile
           - service: emailservice
             dockerfile: ./src/email/Dockerfile
 
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [cartservice, frontend, emailservice]
+        service: [cartservice, emailservice]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -141,6 +141,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to ECR #Added
+        run: |
+          aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}          
 
       - name: Update kubeconfig
         run: |
@@ -158,7 +162,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [cartservice, frontend, emailservice]
+        service: [cartservice, emailservice]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -166,7 +170,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-
+      
+      - name: Login to ECR  #Added
+        run: |
+          aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
