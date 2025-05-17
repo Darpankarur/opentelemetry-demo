@@ -159,7 +159,7 @@ jobs:
       - name: Deploy to EKS
         run: |
           IMAGE_URI=${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
-          kubectl set image deployment/${{ matrix.deployment }} ${{ matrix.container }}=$IMAGE_URI
+          kubectl set image deployment/${{ matrix.deployment }} ${{ matrix.container }}=$IMAGE_URI --namespace=otel-demo
           kubectl rollout status deployment/${{ matrix.deployment }} --timeout=60s
 
   rollback:
