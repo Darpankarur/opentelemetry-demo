@@ -874,7 +874,7 @@ data:
         }
       }
     }
----
+# ---
 # Source: opentelemetry-demo/templates/grafana-dashboards.yaml
 # apiVersion: v1
 # kind: ConfigMap
