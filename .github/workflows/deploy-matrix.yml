@@ -145,6 +145,9 @@ jobs:
             deployment: email
             container: email
     steps:
+      - name: Checkout Code    #NEWWWWWw
+        uses: actions/checkout@v3   #NEWWWW
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -159,8 +162,8 @@ jobs:
       - name: Deploying updated email and cart services to EKS  #NEWWWWWWWWWWWWWWWWWWWWwWW
         run: |
           ECR_PATH=609090160393.dkr.ecr.us-east-1.amazonaws.com/otel-demo
-          sed -i "/name: email/{n;n;s|image: .*|image: $ECR_PATH/email:${{ env.IMAGE_TAG }}|}" ./kubernetes/opentelemetry-demo.yaml
-          sed -i "/name: cart/{n;n;s|image: .*|image: $ECR_PATH/cart:${{ env.IMAGE_TAG }}|}" ./kubernetes/opentelemetry-demo.yaml
+          sed -i "/name: email/{n;n;s|image: .*|image: $ECR_PATH/email:${{ env.IMAGE_TAG }}|}" kubernetes/opentelemetry-demo.yaml
+          sed -i "/name: cart/{n;n;s|image: .*|image: $ECR_PATH/cart:${{ env.IMAGE_TAG }}|}" kubernetes/opentelemetry-demo.yaml
           kubectl apply -f kubernetes/opentelemetry-demo.yaml -n otel-demo
           kubectl rollout status deployment/email -n otel-demo
           kubectl rollout status deployment/cart -n otel-demo
