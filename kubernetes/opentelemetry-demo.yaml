@@ -749,7 +749,7 @@ data:
     {}
   rules: |
     {}
----
+# ---
 # Source: opentelemetry-demo/templates/flagd-config.yaml
 # apiVersion: v1
 # kind: ConfigMap
