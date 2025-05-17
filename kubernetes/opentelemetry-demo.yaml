@@ -10450,20 +10450,20 @@ spec:
     app.kubernetes.io/instance: opentelemetry-demo
     component: standalone-collector
   internalTrafficPolicy: Cluster
----
-# Source: opentelemetry-demo/charts/prometheus/templates/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/component: server
-    app.kubernetes.io/name: prometheus
-    app.kubernetes.io/instance: opentelemetry-demo
-    app.kubernetes.io/version: v3.1.0
-    app.kubernetes.io/part-of: prometheus
-  name: prometheus
-  namespace: otel-demo
-spec:
+# ---
+# # Source: opentelemetry-demo/charts/prometheus/templates/service.yaml
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   labels:
+#     app.kubernetes.io/component: server
+#     app.kubernetes.io/name: prometheus
+#     app.kubernetes.io/instance: opentelemetry-demo
+#     app.kubernetes.io/version: v3.1.0
+#     app.kubernetes.io/part-of: prometheus
+#   name: prometheus
+#   namespace: otel-demo
+# spec:
   ports:
     - name: http
       port: 9090
