@@ -98,7 +98,7 @@ jobs:
           #   dockerfile: ./src/email/Dockerfile
           # - service: frontend
           #   dockerfile: ./src/frontend/Dockerfile
-          - service: emailservice
+          - service: email
             dockerfile: ./src/email/Dockerfile
 
     outputs:
@@ -133,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [cartservice, emailservice]
+        service: [cart, email]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -158,7 +158,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [cartservice, emailservice]
+        service: [cart, email]
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
