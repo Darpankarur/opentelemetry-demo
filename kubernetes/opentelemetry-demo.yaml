@@ -883,9 +883,9 @@ data:
 #   namespace: otel-demo
 #   labels:
     
-    app.kubernetes.io/instance: opentelemetry-demo
-    app.kubernetes.io/version: "2.0.2"
-    app.kubernetes.io/part-of: opentelemetry-demo
+    # app.kubernetes.io/instance: opentelemetry-demo
+    # app.kubernetes.io/version: "2.0.2"
+    # app.kubernetes.io/part-of: opentelemetry-demo
 data:
   
   demo-dashboard.json: |-
