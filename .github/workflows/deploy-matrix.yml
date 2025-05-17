@@ -4,10 +4,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - 'docker-compose.yml'
-      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
 
 env:
   AWS_REGION: us-east-1
