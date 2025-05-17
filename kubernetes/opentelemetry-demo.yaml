@@ -876,12 +876,12 @@ data:
     }
 ---
 # Source: opentelemetry-demo/templates/grafana-dashboards.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: grafana-dashboards
-  namespace: otel-demo
-  labels:
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: grafana-dashboards
+#   namespace: otel-demo
+#   labels:
     
     app.kubernetes.io/instance: opentelemetry-demo
     app.kubernetes.io/version: "2.0.2"
