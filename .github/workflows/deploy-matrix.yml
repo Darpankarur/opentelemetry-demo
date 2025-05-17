@@ -1,0 +1,77 @@
+name: Build and Deploy All Services to EKS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
+
+env:
+  AWS_REGION: us-east-1
+  EKS_CLUSTER_NAME: group20-final-eks-cluster
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - service: accountingservice
+            dockerfile: ./src/accountingservice/Dockerfile
+          - service: adservice
+            dockerfile: ./src/adservice/Dockerfile
+          - service: cartservice
+            dockerfile: ./src/cartservice/src/Dockerfile
+          - service: checkoutservice
+            dockerfile: ./src/checkoutservice/src/Dockerfile
+          - service: currencyservice
+            dockerfile: ./src/currencyservice/Dockerfile
+          - service: emailservice
+            dockerfile: ./src/emailservice/Dockerfile
+          - service: frauddetectionservice
+            dockerfile: ./src/frauddetectionservice/Dockerfile
+          - service: frontend
+            dockerfile: ./src/frontend/Dockerfile
+          - service: frontendproxy
+            dockerfile: ./src/frontendproxy/Dockerfile
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
+    - name: Build and Push Docker Image for ${{ matrix.service }}
+      run: |
+        IMAGE_URI=${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+        docker build -t $IMAGE_URI -f ${{ matrix.dockerfile }} .
+        docker push $IMAGE_URI
+
+    - name: Update Kubeconfig
+      run: |
+        aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+
+    - name: Deploy ${{ matrix.service }} to EKS
+      run: |
+        IMAGE_URI=${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+        kubectl set image deployment/${{ matrix.service }}           ${{ matrix.service }}=$IMAGE_URI
+        kubectl rollout status deployment/${{ matrix.service }} --timeout=60s
+
+    - name: Rollback ${{ matrix.service }} on Failure
+      if: failure()
+      run: |
+        echo "Rolling back ${{ matrix.service }}..."
+        kubectl rollout undo deployment/${{ matrix.service }}
