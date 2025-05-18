@@ -17,20 +17,10 @@ jobs:
     strategy:
       matrix:
         include:
-          # - service: accountingservice
-          #   dockerfile: ./src/accounting/Dockerfile
           - service: cart
             deployment: cart
             contiainer: cart
             dockerfile: ./src/cart/src/Dockerfile
-          # - service: checkoutservice
-          #   dockerfile: ./src/checkout/Dockerfile
-          # - service: currencyservice
-          #   dockerfile: ./src/currency/Dockerfile
-          # - service: emailservice
-          #   dockerfile: ./src/email/Dockerfile
-          # - service: frontend
-          #   dockerfile: ./src/frontend/Dockerfile
           - service: email
             deployment: email
             container: email
