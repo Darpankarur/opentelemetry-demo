@@ -205,7 +205,7 @@ jobs:
             dockerfile: ./src/email/Dockerfile
 
     steps:
-      - name: Checkout Repo
+      - name: Checkout repo
         uses: actions/checkout@v3
 
       - name: Login to Docker Hub
