@@ -121,14 +121,14 @@ jobs:
         run: |
           aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
 
-      - name: Set Kubernetes Context
-        run: |
-          kubectl config use-context arn:aws:eks:${{ env.AWS_REGION }}:${{ github.accountId }}:cluster/${{ env.EKS_CLUSTER_NAME }}
+      # - name: Set Kubernetes Context
+      #   run: |
+      #     kubectl config use-context arn:aws:eks:${{ env.AWS_REGION }}:${{ github.accountId }}:cluster/${{ env.EKS_CLUSTER_NAME }}
 
-      - name: Test Kubernetes Connection
-        run: |
-          kubectl get namespace $K8S_NAMESPACE -o json # Get the namespace, ensure connected
-          kubectl get deployment -n $K8S_NAMESPACE # List deployments in your namespace
+      # - name: Test Kubernetes Connection
+      #   run: |
+      #     kubectl get namespace $K8S_NAMESPACE -o json # Get the namespace, ensure connected
+      #     kubectl get deployment -n $K8S_NAMESPACE # List deployments in your namespace
   # deploy:
   #   needs: build
   #   runs-on: ubuntu-latest
