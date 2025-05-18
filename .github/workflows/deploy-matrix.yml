@@ -159,7 +159,7 @@ jobs:
         run: |
           aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
   
-      - name: Deploy updated email and cart services to EKS  #NEWWWWWWWWWWWWWWWWWWWWwWW
+      - name: Deploying updated email and cart services to EKS  #NEWWWWWWWWWWWWWWWWWWWWwWW
         run: |
           ECR_PATH=609090160393.dkr.ecr.us-east-1.amazonaws.com/otel-demo
           sed -i "/name: email/{n;n;s|image: .*|image: $ECR_PATH/email:${{ env.IMAGE_TAG }}|}" kubernetes/opentelemetry-demo.yaml
