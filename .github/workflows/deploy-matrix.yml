@@ -184,12 +184,8 @@ on:
       - main
 
 env:
-  AWS_REGION: us-east-1
   EKS_CLUSTER_NAME: group20-final-eks-cluster
   IMAGE_TAG: ${{ github.sha }}
-  K8S_NAMESPACE: otel-demo
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
   build:
@@ -205,19 +201,19 @@ jobs:
             deployment: email
             container: email
             dockerfile: ./src/email/Dockerfile
-
     steps:
-      - name: Checkout repo
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
       - name: Login to Docker Hub
-        run: echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Build and Push Image to Docker Hub
+      - name: Build and Push Image
         run: |
-          IMAGE_NAME=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/otel-${{ matrix.service }}:${IMAGE_TAG}
-          docker build -t $IMAGE_NAME -f ${{ matrix.dockerfile }} .
-          docker push $IMAGE_NAME
+          IMAGE_URI=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          docker build -t $IMAGE_URI -f ${{ matrix.dockerfile }} .
+          docker push $IMAGE_URI
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
 
   deploy:
     needs: build
@@ -231,26 +227,23 @@ jobs:
           - service: email
             deployment: email
             container: email
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
-
-      - name: Deploy to EKS using Docker Hub image
         run: |
-          IMAGE_URI=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/otel-${{ matrix.service }}:${IMAGE_TAG}
-          kubectl set image deployment/${{ matrix.deployment }} ${{ matrix.container }}=$IMAGE_URI -n $K8S_NAMESPACE
-          kubectl rollout status deployment/${{ matrix.deployment }} -n $K8S_NAMESPACE
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region us-east-1
+
+      - name: Deploy to EKS
+        run: |
+          IMAGE_URI=docker.io/${{ secrets.DOCKER_USERNAME }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          kubectl set image deployment/${{ matrix.deployment }} ${{ matrix.container }}=$IMAGE_URI --namespace=otel-demo
+          kubectl rollout status deployment/${{ matrix.deployment }} --namespace=otel-demo --timeout=60s
 
   rollback:
     needs: deploy
@@ -263,19 +256,19 @@ jobs:
             container: cart
           - deployment: email
             container: email
-
     steps:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1
 
       - name: Update kubeconfig
-        run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
+        run: |
+          aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region us-east-1
 
       - name: Rollback Deployment
         run: |
           echo "Rolling back ${{ matrix.deployment }} to last stable image..."
-          kubectl rollout undo deployment/${{ matrix.deployment }} -n $K8S_NAMESPACE
+          kubectl rollout undo deployment/${{ matrix.deployment }} --namespace=otel-demo
