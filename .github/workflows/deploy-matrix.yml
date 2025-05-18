@@ -89,29 +89,29 @@ jobs:
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
-      - name: Deploy email and cart (no manifest)
-        run: |
-         ECR_URI=609090160393.dkr.ecr.us-east-1.amazonaws.com/otel-demo
-         kubectl set image deployment/email email=$ECR_URI/email:$IMAGE_TAG -n otel-demo
-         kubectl set image deployment/cart cart=$ECR_URI/cart:$IMAGE_TAG -n otel-demo
-         kubectl rollout status deployment/email -n otel-demo
-         kubectl rollout status deployment/cart -n otel-demo
- 
-      # - name: Deploying updated email and cart services to EKS  #NEWWWWWWWWWWWWWWWWWWWWwWW
+      # - name: Deploy email and cart (no manifest)
       #   run: |
-      #     ECR_PATH=609090160393.dkr.ecr.us-east-1.amazonaws.com/otel-demo
-      #     sed -i "/name: email/{n;n;s|image: .*|image: $ECR_PATH/email:${{ env.IMAGE_TAG }}|}" kubernetes/opentelemetry-demo.yaml
-      #     sed -i "/name: cart/{n;n;s|image: .*|image: $ECR_PATH/cart:${{ env.IMAGE_TAG }}|}" kubernetes/opentelemetry-demo.yaml
-      #     kubectl apply -f kubernetes/opentelemetry-demo.yaml -n otel-demo --validate=false
-      #     kubectl rollout status deployment/email -n otel-demo
-      #     kubectl rollout status deployment/cart -n otel-demo
+      #    ECR_URI=609090160393.dkr.ecr.us-east-1.amazonaws.com/otel-demo
+      #    kubectl set image deployment/email email=$ECR_URI/email:$IMAGE_TAG -n otel-demo
+      #    kubectl set image deployment/cart cart=$ECR_URI/cart:$IMAGE_TAG -n otel-demo
+      #    kubectl rollout status deployment/email -n otel-demo
+      #    kubectl rollout status deployment/cart -n otel-demo
+ 
+      - name: Deploying updated email and cart services to EKS  #NEWWWWWWWWWWWWWWWWWWWWwWW
+        run: |
+          ECR_PATH=609090160393.dkr.ecr.us-east-1.amazonaws.com/otel-demo
+          sed -i "/name: email/{n;n;s|image: .*|image: $ECR_PATH/email:${{ env.IMAGE_TAG }}|}" kubernetes/opentelemetry-demo.yaml
+          sed -i "/name: cart/{n;n;s|image: .*|image: $ECR_PATH/cart:${{ env.IMAGE_TAG }}|}" kubernetes/opentelemetry-demo.yaml
+          kubectl apply -f kubernetes/opentelemetry-demo.yaml -n otel-demo --validate=false
+          kubectl rollout status deployment/email -n otel-demo
+          kubectl rollout status deployment/cart -n otel-demo
     
 
-      # - name: Deploy to EKS 
-      #   run: |
-      #     IMAGE_URI=${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
-      #     kubectl set image deployment/${{ matrix.deployment }} ${{ matrix.container }}=$IMAGE_URI --namespace=otel-demo
-      #     kubectl rollout status deployment/${{ matrix.deployment }} --timeout=60s
+      - name: Deploy to EKS 
+        run: |
+          IMAGE_URI=${{ secrets.ECR_REGISTRY }}/${{ matrix.service }}:${{ env.IMAGE_TAG }}
+          kubectl set image deployment/${{ matrix.deployment }} ${{ matrix.container }}=$IMAGE_URI --namespace=otel-demo
+          kubectl rollout status deployment/${{ matrix.deployment }} --timeout=60s
 
   rollback:
     needs: deploy
