@@ -188,7 +188,7 @@ env:
   EKS_CLUSTER_NAME: group20-final-eks-cluster
   IMAGE_TAG: ${{ github.sha }}
   K8S_NAMESPACE: otel-demo
-  DOCKERHUB_NAMESPACE: your_dockerhub_username  # 👈 change this to your actual Docker Hub username
+  DOCKERHUB_NAMESPACE: darpankarur # 🔁 Replace this!
 
 jobs:
   build:
@@ -205,11 +205,17 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
-      - name: Build and Tag Image (Public DockerHub)
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Image
         run: |
           IMAGE_NAME=docker.io/${{ env.DOCKERHUB_NAMESPACE }}/otel-${{ matrix.service }}:${{ env.IMAGE_TAG }}
           docker build -t $IMAGE_NAME -f ${{ matrix.dockerfile }} .
-          echo "::warning::Skipping docker push to Docker Hub — assuming image already exists or testing only"
+          docker push $IMAGE_NAME
 
   deploy:
     needs: build
@@ -238,10 +244,9 @@ jobs:
       - name: Update kubeconfig
         run: aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --region $AWS_REGION
 
-      - name: Deploy using Docker Hub image
+      - name: Deploy to EKS using Docker Hub image
         run: |
           IMAGE_URI=docker.io/${{ env.DOCKERHUB_NAMESPACE }}/otel-${{ matrix.service }}:${IMAGE_TAG}
-          echo "Deploying $IMAGE_URI to ${{ matrix.deployment }}"
           kubectl set image deployment/${{ matrix.deployment }} ${{ matrix.container }}=$IMAGE_URI -n $K8S_NAMESPACE
           kubectl rollout status deployment/${{ matrix.deployment }} -n $K8S_NAMESPACE
 
@@ -270,5 +275,6 @@ jobs:
 
       - name: Rollback Deployment
         run: |
-          echo "Rolling back ${{ matrix.deployment }} to previous stable version..."
+          echo "Rolling back ${{ matrix.deployment }} to previous stable image..."
           kubectl rollout undo deployment/${{ matrix.deployment }} -n $K8S_NAMESPACE
+
